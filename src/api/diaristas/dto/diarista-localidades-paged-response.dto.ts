@@ -1,8 +1,12 @@
+import { Expose } from 'class-transformer';
 import { DiaristaLocalidadeResponse } from './create-diarista.dto';
 
 export class DiaristaLocalidadesPagedResponse {
   diaristas: DiaristaLocalidadeResponse[];
-  quantidade_diaristas: number;
+
+  @Expose({ name: 'quantidade_diaristas' })
+  tamanhoPagina: number;
+
   totalElementos: number;
 
   constructor(
@@ -11,7 +15,7 @@ export class DiaristaLocalidadesPagedResponse {
     totalElementos: number,
   ) {
     this.diaristas = diaristas;
-    this.quantidade_diaristas =
+    this.tamanhoPagina =
       totalElementos > tamanhoPagina ? totalElementos - tamanhoPagina : 0;
   }
 }

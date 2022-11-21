@@ -1,26 +1,23 @@
-import { Injectable } from '@nestjs/common';
-import { CreateFotoDto } from './dto/create-foto.dto';
-import { UpdateFotoDto } from './dto/update-foto.dto';
+import { Inject, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Request } from 'express';
+import { Repository } from 'typeorm';
+import { Foto } from './entities/foto.entity';
 
 @Injectable()
 export class FotosService {
-  create(createFotoDto: CreateFotoDto) {
-    return 'This action adds a new foto';
-  }
+  constructor(
+    @InjectRepository(Foto)
+    private fotoRepository: Repository<Foto>,
+  ) {}
 
-  findAll() {
-    return `This action returns all fotos`;
-  }
+  async salvar(file: Express.Multer.File, req: Request): Promise<Foto> {
+    const foto = new Foto();
+    foto.fileName = file.filename;
+    foto.contentLength = file.size;
+    foto.contentType = file.mimetype;
+    foto.url = `http://${req.get('host')}/images/${file.filename}`;
 
-  findOne(id: number) {
-    return `This action returns a #${id} foto`;
-  }
-
-  update(id: number, updateFotoDto: UpdateFotoDto) {
-    return `This action updates a #${id} foto`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} foto`;
+    return await this.fotoRepository.save(foto);
   }
 }

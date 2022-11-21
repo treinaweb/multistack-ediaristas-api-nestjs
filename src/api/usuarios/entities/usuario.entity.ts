@@ -13,6 +13,8 @@ import {
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { CidadesAtendidas } from 'src/api/cidades-atendidas/entities/cidades-atendida.entity';
+import { Exclude } from 'class-transformer';
+
 @Entity()
 export class UsuarioApi {
   @PrimaryGeneratedColumn('increment')
@@ -25,6 +27,7 @@ export class UsuarioApi {
   email: string;
 
   @Column({ nullable: false })
+  @Exclude()
   senha: string;
 
   @Column({ nullable: false })
@@ -94,7 +97,8 @@ export class UsuarioApi {
 
   @BeforeInsert()
   async setPassword(senha: string) {
-    const salt = await bcrypt.salt();
+    const salt = await bcrypt.genSalt();
     this.senha = await bcrypt.hash(senha || this.senha, salt);
+    return this.senha;
   }
 }

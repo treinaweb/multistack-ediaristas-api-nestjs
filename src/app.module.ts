@@ -9,11 +9,15 @@ import { ServicosModule } from './api/servicos/servicos.module';
 import { UsuariosModule } from './api/usuarios/usuarios.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
 import { HateosIndex } from './core/hateoas/hateoas-index';
 import { TypeOrmConfigService } from './database/typeorm-config';
+import { MeModule } from './api/me/me.module';
+import { TokensModule } from './auth/tokens/tokens.module';
 
 @Module({
   imports: [
+    AuthModule,
     TypeOrmModule.forRootAsync({ useClass: TypeOrmConfigService }),
     UsuariosModule,
     CidadesAtendidasModule,
@@ -23,6 +27,8 @@ import { TypeOrmConfigService } from './database/typeorm-config';
     UrlGeneratorModule.forRoot({
       appUrl: 'http://localhost:3000',
     }),
+    MeModule,
+    TokensModule,
   ],
   controllers: [AppController, ApiController],
   providers: [AppService, HateosIndex],

@@ -9,7 +9,7 @@ export class DiaristaMapper {
     diaristaDTO.nomeCompleto = usuario.nomeCompleto;
     diaristaDTO.reputacao = usuario.reputacao;
     diaristaDTO.fotoUsuario = null;
-    diaristaDTO.cidadade = null;
+    diaristaDTO.cidade = null;
     return diaristaDTO;
   }
 }

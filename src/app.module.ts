@@ -14,6 +14,7 @@ import { HateosIndex } from './core/hateoas/hateoas-index';
 import { TypeOrmConfigService } from './database/typeorm-config';
 import { MeModule } from './api/me/me.module';
 import { TokensModule } from './auth/tokens/tokens.module';
+import { DiariasModule } from './api/diarias/diarias.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { TokensModule } from './auth/tokens/tokens.module';
     }),
     MeModule,
     TokensModule,
+    DiariasModule,
   ],
   controllers: [AppController, ApiController],
   providers: [AppService, HateosIndex],

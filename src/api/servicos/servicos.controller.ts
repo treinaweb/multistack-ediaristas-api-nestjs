@@ -13,7 +13,6 @@ export class ServicosController {
 
   @Get()
   findAll(@GetUser() user: UsuarioApi) {
-    console.log(user);
     return this.servicosService.findAll();
   }
 }

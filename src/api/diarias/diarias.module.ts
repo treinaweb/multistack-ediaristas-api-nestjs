@@ -13,6 +13,7 @@ import { ServicoExiste } from 'src/core/validators/diaria/validator-servico';
 import { DataAtendimentoInicio } from 'src/core/validators/diaria/validator-data-atendimento-inicio';
 import { ValidatorDiaria } from 'src/core/validators/diaria/validator-diaria';
 import { ViaCepService } from 'src/core/via-cep.service';
+import { HateoasDiaria } from 'src/core/hateoas/hateoas-diaria';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Diaria, UsuarioApi, Servico])],
@@ -28,6 +29,7 @@ import { ViaCepService } from 'src/core/via-cep.service';
     DataAtendimentoInicio,
     ValidatorDiaria,
     ViaCepService,
+    HateoasDiaria,
   ],
 })
 export class DiariasModule {}

@@ -48,7 +48,9 @@ export class DiariasService {
         servico,
       );
 
-    return this.diariaMapper.toDiariaResponseDto(diariaCadastrada);
+    const diariaDto = this.diariaMapper.toDiariaResponseDto(diariaCadastrada);
+
+    return { diariaDto: diariaDto, diaria: diariaCadastrada };
   }
 
   private calcularComissao(

@@ -15,6 +15,7 @@ import { TypeOrmConfigService } from './database/typeorm-config';
 import { MeModule } from './api/me/me.module';
 import { TokensModule } from './auth/tokens/tokens.module';
 import { DiariasModule } from './api/diarias/diarias.module';
+import { PagamentosModule } from './api/pagamentos/pagamentos.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { DiariasModule } from './api/diarias/diarias.module';
     MeModule,
     TokensModule,
     DiariasModule,
+    PagamentosModule,
   ],
   controllers: [AppController, ApiController],
   providers: [AppService, HateosIndex],

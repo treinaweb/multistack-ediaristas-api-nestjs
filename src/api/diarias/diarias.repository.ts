@@ -1,6 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Servico } from '../servicos/entities/servico.entity';
+import { UsuarioApi } from '../usuarios/entities/usuario.entity';
 import { DiariaRequestDto } from './dto/diaria-request.dto';
 import { Diaria } from './entities/diaria.entity';
 
@@ -63,6 +64,24 @@ export class DiariaRepository {
       });
       await this.save(diaria);
       return diaria;
+    },
+    async findByCliente(cliente: UsuarioApi): Promise<Diaria[]> {
+      return await this.find({
+        where: {
+          cliente: {
+            id: cliente.id,
+          },
+        },
+      });
+    },
+    async findByDiarista(diarista: UsuarioApi): Promise<Diaria[]> {
+      return await this.find({
+        where: {
+          diarista: {
+            id: diarista.id,
+          },
+        },
+      });
     },
   });
 }

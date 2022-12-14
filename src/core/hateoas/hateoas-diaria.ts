@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { DiariasController } from 'src/api/diarias/diarias.controller';
 import { Diaria } from 'src/api/diarias/entities/diaria.entity';
 import DiariaStatus from 'src/api/diarias/enum/diaria-status.enum';
+import { DiaristasController } from 'src/api/diaristas/diaristas.controller';
 import { PagamentosController } from 'src/api/pagamentos/pagamentos.controller';
 import TipoUsuario from 'src/api/usuarios/enum/tipo-usuario.enum';
 import { HateoasLinks } from './hateoas.interface';
@@ -27,6 +29,14 @@ export class HateoasDiaria extends HateoasBase {
         params,
       );
     }
+
+    this.adicionarLinks(
+      'GET',
+      'self',
+      DiariasController,
+      DiariasController.prototype.buscarPorId,
+      params,
+    );
 
     return this.LINKS;
   }

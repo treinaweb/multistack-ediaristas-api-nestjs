@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get, Param } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { Roles } from 'src/auth/decorators/roles.decorator';
@@ -25,6 +25,31 @@ export class DiariasController {
   ) {
     const { diariaDto, diaria } = await this.diariasService.cadastrar(
       diariaRequestDto,
+      usuarioLogado,
+    );
+
+    diariaDto.links = this.hateoas.gerarLinksHateos(
+      usuarioLogado.tipoUsuario,
+      diaria,
+    );
+
+    return diariaDto;
+  }
+
+  @Get()
+  @UseGuards(AuthGuard('jwt'))
+  async listarDiarias(@GetUser() usuarioLogado: UsuarioApi) {
+    return await this.diariasService.listarPorUsuarioLogado(usuarioLogado);
+  }
+
+  @Get(':id')
+  @UseGuards(AuthGuard('jwt'))
+  async buscarPorId(
+    @GetUser() usuarioLogado: UsuarioApi,
+    @Param('id') id: number,
+  ) {
+    const { diariaDto, diaria } = await this.diariasService.buscarPorId(
+      id,
       usuarioLogado,
     );
 

@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { CidadesAtendidasController } from 'src/api/cidades-atendidas/cidades-atendidas.controller';
 import { DiariasController } from 'src/api/diarias/diarias.controller';
+import { EnderecoDiaristaController } from 'src/api/endereco-diarista/endereco-diarista.controller';
 import TipoUsuario from 'src/api/usuarios/enum/tipo-usuario.enum';
 import { HateoasLinks } from './hateoas.interface';
 import { HateoasBase } from './hatoas-base';
@@ -17,6 +19,43 @@ export class HateoasUsuario extends HateoasBase {
         DiariasController.prototype.cadastrar,
       );
     }
+
+    if (tipoUsuario === TipoUsuario.DIARISTA) {
+      this.adicionarLinks(
+        'PUT',
+        'cadastrar_endereco',
+        EnderecoDiaristaController,
+        EnderecoDiaristaController.prototype.atualizarEndereco,
+      );
+
+      this.adicionarLinks(
+        'GET',
+        'listar_endereco',
+        EnderecoDiaristaController,
+        EnderecoDiaristaController.prototype.exibirEndereco,
+      );
+
+      this.adicionarLinks(
+        'PUT',
+        'relacionar_cidades',
+        CidadesAtendidasController,
+        CidadesAtendidasController.prototype.atualizarCidadesAtendidas,
+      );
+
+      this.adicionarLinks(
+        'GET',
+        'listar_cidades',
+        CidadesAtendidasController,
+        CidadesAtendidasController.prototype.listarCidadesAtendidas,
+      );
+    }
+
+    this.adicionarLinks(
+      'GET',
+      'lista_diarias',
+      DiariasController,
+      DiariasController.prototype.listarDiarias,
+    );
 
     return this.LINKS;
   }

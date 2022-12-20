@@ -1,3 +1,4 @@
+import { Expose } from 'class-transformer';
 import { UsuarioApi } from 'src/api/usuarios/entities/usuario.entity';
 import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 
@@ -7,6 +8,7 @@ export class CidadesAtendidas {
   id: number;
 
   @Column({ nullable: false })
+  @Expose({ name: 'codigo_ibge ' })
   codigoIbge: string;
 
   @Column({ nullable: false })

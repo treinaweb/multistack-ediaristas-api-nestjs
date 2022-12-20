@@ -14,6 +14,7 @@ import {
 import * as bcrypt from 'bcrypt';
 import { CidadesAtendidas } from 'src/api/cidades-atendidas/entities/cidades-atendida.entity';
 import { Exclude } from 'class-transformer';
+import { EnderecoDiarista } from 'src/api/endereco-diarista/entities/endereco-diarista.entity';
 
 @Entity()
 export class UsuarioApi {
@@ -73,14 +74,13 @@ export class UsuarioApi {
   @JoinTable({ name: 'cidades_atendidas_usuarios' })
   cidadesAtendidas: CidadesAtendidas[];
 
-  /*   
   @OneToOne(() => EnderecoDiarista, {
     nullable: true,
     eager: true,
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'endereco_id' })
-  endereco: EnderecoDiarista; */
+  endereco: EnderecoDiarista;
 
   @CreateDateColumn({
     type: 'timestamp',

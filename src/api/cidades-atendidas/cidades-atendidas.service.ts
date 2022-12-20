@@ -1,26 +1,84 @@
-import { Injectable } from '@nestjs/common';
-import { CreateCidadesAtendidaDto } from './dto/create-cidades-atendida.dto';
-import { UpdateCidadesAtendidaDto } from './dto/update-cidades-atendida.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { plainToClass, plainToInstance } from 'class-transformer';
+import { IbgeService } from 'src/core/services/consulta-cidade/conulta-cidade.service';
+import { Repository } from 'typeorm';
+import { UsuarioApi } from '../usuarios/entities/usuario.entity';
+import { UsuarioRepository } from '../usuarios/usuarios.repository';
+import { CidadeAtendidaRequestDto } from './dto/cidade-atendida-request.dto';
+import { CidadeAtendidaResponseDto } from './dto/cidade-atendida-response.dto';
+import { CidadesAtendidasRequestDto } from './dto/cidades-atendidas-request.dto';
+import { CidadesAtendidas } from './entities/cidades-atendida.entity';
 
 @Injectable()
 export class CidadesAtendidasService {
-  create(createCidadesAtendidaDto: CreateCidadesAtendidaDto) {
-    return 'This action adds a new cidadesAtendida';
+  constructor(
+    @InjectRepository(CidadesAtendidas)
+    private cidadesAtendidasRepository: Repository<CidadesAtendidas>,
+    private consultaCidade: IbgeService,
+    private usuarioRepository: UsuarioRepository,
+  ) {}
+  cidadesAtendidas = [];
+  listarCidadesAtendidas(
+    usuarioLogado: UsuarioApi,
+  ): CidadeAtendidaResponseDto[] {
+    return usuarioLogado.cidadesAtendidas;
   }
 
-  findAll() {
-    return `This action returns all cidadesAtendidas`;
+  async atualizarCidadesAtendidas(
+    request: CidadesAtendidasRequestDto,
+    usuarioLogado: UsuarioApi,
+  ): Promise<{ message: string }> {
+    await this.mapearArrayCidades(request);
+
+    usuarioLogado.cidadesAtendidas = this.cidadesAtendidas;
+    await this.usuarioRepository.repository.save(usuarioLogado);
+
+    return { message: 'Cidades Atendidas atualizadas com sucesso' };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} cidadesAtendida`;
+  private async mapearArrayCidades(request: CidadesAtendidasRequestDto) {
+    return Promise.all(
+      request.cidades.map(async (cidadeAtendidaRequest) => {
+        const cidadeAtendidaDto = plainToInstance(
+          CidadeAtendidaRequestDto,
+          cidadeAtendidaRequest,
+        );
+        const codigoIbge = cidadeAtendidaDto.codigoIbge;
+        let cidadeAtendida = new CidadesAtendidas();
+
+        try {
+          cidadeAtendida = await this.findByCodigoIbge(codigoIbge);
+        } catch (error) {
+          if (error.status === 404) {
+            cidadeAtendida = await this.cadastrarCidadeAtendida(codigoIbge);
+          }
+        }
+        this.cidadesAtendidas.push(cidadeAtendida);
+      }),
+    );
   }
 
-  update(id: number, updateCidadesAtendidaDto: UpdateCidadesAtendidaDto) {
-    return `This action updates a #${id} cidadesAtendida`;
+  private async cadastrarCidadeAtendida(codigoIbge: string) {
+    const cidade = await this.consultaCidade.busucarCidadePorCodigoIbge(
+      codigoIbge,
+    );
+
+    const cidadeAtendida = new CidadesAtendidas();
+    cidadeAtendida.codigoIbge = codigoIbge;
+    cidadeAtendida.cidade = cidade.cidade;
+    cidadeAtendida.estado = cidade.estado;
+
+    return await this.cidadesAtendidasRepository.save(cidadeAtendida);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} cidadesAtendida`;
+  private async findByCodigoIbge(codigoIbge: string) {
+    const cidadeAtendida = await this.cidadesAtendidasRepository.findOneBy({
+      codigoIbge: codigoIbge,
+    });
+    if (!cidadeAtendida) {
+      throw new NotFoundException('Cidade Atendida Não Encontrada');
+    }
+    return cidadeAtendida;
   }
 }

@@ -16,6 +16,7 @@ import { MeModule } from './api/me/me.module';
 import { TokensModule } from './auth/tokens/tokens.module';
 import { DiariasModule } from './api/diarias/diarias.module';
 import { PagamentosModule } from './api/pagamentos/pagamentos.module';
+import { EnderecoDiaristaModule } from './api/endereco-diarista/endereco-diarista.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { PagamentosModule } from './api/pagamentos/pagamentos.module';
     TokensModule,
     DiariasModule,
     PagamentosModule,
+    EnderecoDiaristaModule,
   ],
   controllers: [AppController, ApiController],
   providers: [AppService, HateosIndex],

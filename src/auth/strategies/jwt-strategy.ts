@@ -20,7 +20,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  async validate(payload: JwtPayload): Promise<UsuarioResponseDto> {
+  async validate(payload: JwtPayload): Promise<UsuarioApi> {
     const { email } = payload;
     const usuario = await this.usuarioRepository.repository.findOneBy({
       email: email,
@@ -30,6 +30,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       throw new UnauthorizedException();
     }
 
-    return this.mapper.toUsuarioResponseDto(usuario);
+    return usuario;
   }
 }

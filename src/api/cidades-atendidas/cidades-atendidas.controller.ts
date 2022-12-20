@@ -1,47 +1,37 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Body, Controller, Get, Put, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { GetUser } from 'src/auth/decorators/get-user.decorator';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { UsuarioApi } from '../usuarios/entities/usuario.entity';
+import TipoUsuario from '../usuarios/enum/tipo-usuario.enum';
 import { CidadesAtendidasService } from './cidades-atendidas.service';
-import { CreateCidadesAtendidaDto } from './dto/create-cidades-atendida.dto';
-import { UpdateCidadesAtendidaDto } from './dto/update-cidades-atendida.dto';
+import { CidadeAtendidaResponseDto } from './dto/cidade-atendida-response.dto';
+import { CidadesAtendidasRequestDto } from './dto/cidades-atendidas-request.dto';
 
-@Controller('cidades-atendidas')
+@Controller('api/usuarios')
 export class CidadesAtendidasController {
-  constructor(
-    private readonly cidadesAtendidasService: CidadesAtendidasService,
-  ) {}
+  constructor(private cidadesService: CidadesAtendidasService) {}
 
-  @Post()
-  create(@Body() createCidadesAtendidaDto: CreateCidadesAtendidaDto) {
-    return this.cidadesAtendidasService.create(createCidadesAtendidaDto);
+  @Get('cidades-atendidas')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(TipoUsuario.DIARISTA)
+  listarCidadesAtendidas(
+    @GetUser() usuarioLogado: UsuarioApi,
+  ): CidadeAtendidaResponseDto[] {
+    return this.cidadesService.listarCidadesAtendidas(usuarioLogado);
   }
 
-  @Get()
-  findAll() {
-    return this.cidadesAtendidasService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.cidadesAtendidasService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateCidadesAtendidaDto: UpdateCidadesAtendidaDto,
-  ) {
-    return this.cidadesAtendidasService.update(+id, updateCidadesAtendidaDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.cidadesAtendidasService.remove(+id);
+  @Put('cidades-atendidas')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(TipoUsuario.DIARISTA)
+  atualizarCidadesAtendidas(
+    @GetUser() usuarioLogado: UsuarioApi,
+    @Body() request: CidadesAtendidasRequestDto,
+  ): Promise<{ message: string }> {
+    return this.cidadesService.atualizarCidadesAtendidas(
+      request,
+      usuarioLogado,
+    );
   }
 }

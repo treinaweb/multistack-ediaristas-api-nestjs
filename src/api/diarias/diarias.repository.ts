@@ -1,9 +1,11 @@
+import { NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Servico } from '../servicos/entities/servico.entity';
 import { UsuarioApi } from '../usuarios/entities/usuario.entity';
 import { DiariaRequestDto } from './dto/diaria-request.dto';
 import { Diaria } from './entities/diaria.entity';
+import DiariaStatus from './enum/diaria-status.enum';
 
 export class DiariaRepository {
   constructor(
@@ -82,6 +84,40 @@ export class DiariaRepository {
           },
         },
       });
+    },
+
+    async findOportunidades(
+      cidades: string[],
+      usuarioLogado: UsuarioApi,
+    ): Promise<Diaria[]> {
+      const diariasSql = await this.manager.query(
+        `select * from diaria where status = ${DiariaStatus.PAGO}
+        and codigo_ibge IN (${cidades})
+        and (select count(*)
+        from diaria_candidato
+        where diaria.id = diaria_candidato.diaria_id) < 4
+        and not exists (select * from diaria_candidato
+        where diaria.id = diaria_candidato.diaria_id
+        and usuario_api_id = ${usuarioLogado.id})`,
+      );
+
+      const ids = diariasSql.map((diaria) => diaria.id);
+
+      if (ids.length === 0) {
+        throw new NotFoundException('Não há diárias disponíveis');
+      }
+
+      const diarias = await this.createQueryBuilder('diaria')
+        .select('diaria')
+        .leftJoinAndSelect('diaria.cliente', 'cliente')
+        .leftJoinAndSelect('diaria.candidatos', 'candidatos')
+        .leftJoinAndSelect('diaria.servico', 'service')
+        .leftJoinAndSelect('diaria.diarista', 'diarista')
+        .where('diaria.id IN(:id)', { id: ids })
+        .andWhere('diaria.diarista IS NULL')
+        .getMany();
+
+      return diarias;
     },
   });
 }

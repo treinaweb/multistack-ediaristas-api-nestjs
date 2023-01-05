@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ConfirmacaoPresencaController } from 'src/api/confirmacao-presenca/confirmacao-presenca.controller';
 import { DiariasController } from 'src/api/diarias/diarias.controller';
 import { Diaria } from 'src/api/diarias/entities/diaria.entity';
 import DiariaStatus from 'src/api/diarias/enum/diaria-status.enum';
@@ -30,6 +31,16 @@ export class HateoasDiaria extends HateoasBase {
       );
     }
 
+    if (this.isAptaParaConfirmacaoPresencia(diaria, tipoUsuario)) {
+      this.adicionarLinks(
+        'PATCH',
+        'confirmar_diarista',
+        ConfirmacaoPresencaController,
+        ConfirmacaoPresencaController.prototype.confirmacaoPresenca,
+        params,
+      );
+    }
+
     this.adicionarLinks(
       'GET',
       'self',
@@ -39,5 +50,16 @@ export class HateoasDiaria extends HateoasBase {
     );
 
     return this.LINKS;
+  }
+  private isAptaParaConfirmacaoPresencia(diaria: Diaria, tipoUsuario: number) {
+    const hoje = new Date(Date.now());
+    if (
+      tipoUsuario === TipoUsuario.CLIENTE &&
+      diaria.status === DiariaStatus.CONFIRMADO &&
+      diaria.dataAtendimento < hoje
+    ) {
+      return true;
+    }
+    return false;
   }
 }

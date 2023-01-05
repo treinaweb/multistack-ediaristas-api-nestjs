@@ -19,6 +19,8 @@ import { PagamentosModule } from './api/pagamentos/pagamentos.module';
 import { EnderecoDiaristaModule } from './api/endereco-diarista/endereco-diarista.module';
 import { CandidaturasModule } from './api/candidaturas/candidaturas.module';
 import { OportunidadesModule } from './api/oportunidades/oportunidades.module';
+import { CoreModule } from './core/core.module';
+import { ConfirmacaoPresencaModule } from './api/confirmacao-presenca/confirmacao-presenca.module';
 
 @Module({
   imports: [
@@ -39,6 +41,8 @@ import { OportunidadesModule } from './api/oportunidades/oportunidades.module';
     EnderecoDiaristaModule,
     CandidaturasModule,
     OportunidadesModule,
+    CoreModule,
+    ConfirmacaoPresencaModule,
   ],
   controllers: [AppController, ApiController],
   providers: [AppService, HateosIndex],

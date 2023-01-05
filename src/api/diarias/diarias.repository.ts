@@ -119,5 +119,19 @@ export class DiariaRepository {
 
       return diarias;
     },
+
+    async getAptasParaSelecaoDiarista(): Promise<Diaria[]> {
+      const diaria = await this.createQueryBuilder('diaria')
+        .select('diaria')
+        .leftJoinAndSelect('diaria.candidatos', 'candidatos')
+        .leftJoinAndSelect('candidatos.endereco', 'endereco')
+        .where('diaria.status = :status', { status: DiariaStatus.PAGO })
+        .andWhere('diaria.diarista IS NULL')
+        .andWhere('usuario_api_id IS NOT NULL')
+        .andWhere('diaria.created_at + interval 1 day < now()')
+        .getMany();
+
+      return diaria;
+    },
   });
 }

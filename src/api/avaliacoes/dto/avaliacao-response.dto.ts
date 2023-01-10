@@ -1,6 +1,6 @@
 import { Expose } from 'class-transformer';
 
-export class AvalicaoResponseDto {
+export class AvaliacaoResponseDto {
   descricao: string;
   nota: number;
 

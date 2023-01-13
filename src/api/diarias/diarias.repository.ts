@@ -1,6 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Avaliacao } from '../avaliacoes/entities/avaliacao.entity';
 import { Servico } from '../servicos/entities/servico.entity';
 import { UsuarioApi } from '../usuarios/entities/usuario.entity';
 import { DiariaRequestDto } from './dto/diaria-request.dto';

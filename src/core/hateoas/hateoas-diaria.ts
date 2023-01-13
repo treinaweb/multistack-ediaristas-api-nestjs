@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { AvaliacaoController } from 'src/api/avaliacoes/avaliacao.controller';
 import { ConfirmacaoPresencaController } from 'src/api/confirmacao-presenca/confirmacao-presenca.controller';
 import { DiariasController } from 'src/api/diarias/diarias.controller';
 import { Diaria } from 'src/api/diarias/entities/diaria.entity';
@@ -11,7 +12,11 @@ import { HateoasBase } from './hatoas-base';
 
 @Injectable()
 export class HateoasDiaria extends HateoasBase {
-  gerarLinksHateos(tipoUsuario?: number, diaria?: Diaria): HateoasLinks[] {
+  gerarLinksHateos(
+    tipoUsuario?: number,
+    diaria?: Diaria,
+    avaliacaoApta?: boolean,
+  ): HateoasLinks[] {
     this.LINKS = [];
 
     const params = {
@@ -49,8 +54,22 @@ export class HateoasDiaria extends HateoasBase {
       params,
     );
 
+    if (this.isAptaParaAvaliacao(diaria, avaliacaoApta)) {
+      this.adicionarLinks(
+        'PATCH',
+        'avaliar_diaria',
+        AvaliacaoController,
+        AvaliacaoController.prototype.avaliarDiaria,
+        params,
+      );
+    }
+
     return this.LINKS;
   }
+  private isAptaParaAvaliacao(diaria: Diaria, avaliacaoApta: boolean): boolean {
+    return diaria.status === DiariaStatus.CONCLUIDO && !avaliacaoApta;
+  }
+
   private isAptaParaConfirmacaoPresencia(diaria: Diaria, tipoUsuario: number) {
     const hoje = new Date(Date.now());
     if (

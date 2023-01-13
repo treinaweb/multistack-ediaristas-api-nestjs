@@ -19,12 +19,12 @@ export class OportunidadesController {
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(TipoUsuario.DIARISTA)
   async buscarOportunidades(@GetUser() usuarioLogado: UsuarioApi) {
-    const oportunidades = await this.oportunidadesService.buscarOportunidades(
-      usuarioLogado,
-    );
-    return oportunidades.map((oportunidade) => {
-      oportunidade.links = this.hateoas.gerarLinksHateos(oportunidade);
-      return oportunidade;
-    });
+    const { diariaResponseDto, diarias } =
+      await this.oportunidadesService.buscarOportunidades(usuarioLogado);
+
+    for (let i = 0; i < diarias.length; i++) {
+      diariaResponseDto[i].links = this.hateoas.gerarLinksHateos(diarias[i]);
+    }
+    return diariaResponseDto;
   }
 }

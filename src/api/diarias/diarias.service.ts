@@ -4,6 +4,7 @@ import { HateoasDiaria } from 'src/core/hateoas/hateoas-diaria';
 import { ValidatorDiaria } from 'src/core/validators/diaria/validator-diaria';
 import { ValidatorDiariaUsuario } from 'src/core/validators/diaria/validator-diaria-usuario';
 import { Repository } from 'typeorm';
+import { AvaliacaoRepository } from '../avaliacoes/avaliacao.repository';
 import { Servico } from '../servicos/entities/servico.entity';
 import { UsuarioApi } from '../usuarios/entities/usuario.entity';
 import TipoUsuario from '../usuarios/enum/tipo-usuario.enum';
@@ -24,6 +25,7 @@ export class DiariasService {
     private validatorDiaria: ValidatorDiaria,
     private hateOas: HateoasDiaria,
     private validatorUsuario: ValidatorDiariaUsuario,
+    private avaliacaoRepository: AvaliacaoRepository,
   ) {}
   async cadastrar(
     diariaRequestDto: DiariaRequestDto,
@@ -66,11 +68,17 @@ export class DiariasService {
         usuarioLogado,
       );
       return Promise.all(
-        diarias.map((diaria) => {
+        diarias.map(async (diaria) => {
           const diariaDto = this.diariaMapper.toDiariaResponseDto(diaria);
+          const avaliacao =
+            await this.avaliacaoRepository.repository.findAvaliadorAndDiaria(
+              usuarioLogado,
+              diaria,
+            );
           diariaDto.links = this.hateOas.gerarLinksHateos(
             usuarioLogado.tipoUsuario,
             diaria,
+            avaliacao,
           );
           return diariaDto;
         }),
@@ -80,11 +88,17 @@ export class DiariasService {
         usuarioLogado,
       );
       return Promise.all(
-        diarias.map((diaria) => {
+        diarias.map(async (diaria) => {
           const diariaDto = this.diariaMapper.toDiariaResponseDto(diaria);
+          const avaliacao =
+            await this.avaliacaoRepository.repository.findAvaliadorAndDiaria(
+              usuarioLogado,
+              diaria,
+            );
           diariaDto.links = this.hateOas.gerarLinksHateos(
             usuarioLogado.tipoUsuario,
             diaria,
+            avaliacao,
           );
           return diariaDto;
         }),

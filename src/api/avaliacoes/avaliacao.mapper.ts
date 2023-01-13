@@ -15,7 +15,11 @@ export class AvaliacaoMapper {
     avaliacaoResponse.descricao = avaliacao.descricao;
     avaliacaoResponse.nota = avaliacao.nota;
     avaliacaoResponse.nomeAvaliador = avaliacao.avaliador.nomeCompleto;
-    avaliacaoResponse.fotoAvaliador = avaliacao.avaliador.fotoUsuario.url;
+    if (!avaliacao.avaliador.fotoUsuario) {
+      avaliacaoResponse.fotoAvaliador = null;
+    } else {
+      avaliacaoResponse.fotoAvaliador = avaliacao.avaliador.fotoUsuario.url;
+    }
     return avaliacaoResponse;
   }
 }

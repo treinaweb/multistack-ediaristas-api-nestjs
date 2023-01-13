@@ -26,7 +26,7 @@ export class ScheduleTask {
       async (diaria) => await this.selecionarDiarista(diaria),
     );
 
-    this.logger.debug('Taks de seleção de diarias finalizada');
+    this.logger.debug('Task de seleção de diarias finalizada');
   }
 
   private async selecionarDiarista(diaria: Diaria) {

@@ -134,5 +134,33 @@ export class DiariaRepository {
 
       return diaria;
     },
+
+    async getAptasParaCancelamento(): Promise<Diaria[]> {
+      const diariasSemCandidatoPaga = await this.createQueryBuilder('diaria')
+        .select('diaria')
+        .leftJoinAndSelect('diaria.candidatos', 'candidatos')
+        .where('usuario_api_id IS NULL')
+        .andWhere('diaria.status = :status', { status: DiariaStatus.PAGO })
+        .andWhere('diaria.data_atendimento - interval 1 day < now()')
+        .getMany();
+
+      const diariasSemCandidatoSemPagamento = await this.createQueryBuilder(
+        'diaria',
+      )
+        .select('diaria')
+        .leftJoinAndSelect('diaria.candidatos', 'candidatos')
+        .where('usuario_api_id IS NULL')
+        .andWhere('diaria.status = :status', {
+          status: DiariaStatus.SEM_PAGAMENTO,
+        })
+        .andWhere('diaria.created_at + interval 1 day < now()')
+        .getMany();
+
+      const diarias = diariasSemCandidatoPaga.concat(
+        diariasSemCandidatoSemPagamento,
+      );
+
+      return diarias;
+    },
   });
 }

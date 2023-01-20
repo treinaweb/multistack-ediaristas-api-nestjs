@@ -1,13 +1,20 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import axios from 'axios';
-import { instanceToPlain } from 'class-transformer';
+import { instanceToPlain, plainToInstance } from 'class-transformer';
+import { NotFoundError } from 'rxjs';
 import { Diaria } from 'src/api/diarias/entities/diaria.entity';
 import { Pagamento } from 'src/api/pagamentos/entities/pagamento.entity';
 import { PagamentoStatus } from 'src/api/pagamentos/enum/pagamento-status.enum';
 import { PagamentoRepository } from 'src/api/pagamentos/pagamentos.repository';
 import { GatewayPagamentoService } from '../gataway-pagamento.service';
-import { PagarmeTransacaoResponseDto } from './dtos/pagarmeTransacaoRequest.dto';
-import { PagarmeTransacaoRequestDto } from './dtos/pagarmeTransacaoResponse.dto';
+import { PagarmeReembolsoRequestDto } from './dtos/pagarme-reembolso-request.dto';
+import { PagarmeReembolsoResponseDto } from './dtos/pagarme-reembolso-response.dto';
+import { PagarmeTransacaoResponseDto } from './dtos/pagarme-transacao-request.dto';
+import { PagarmeTransacaoRequestDto } from './dtos/pagarme-transacao-response.dto';
 
 @Injectable()
 export class PagarmeService implements GatewayPagamentoService {
@@ -24,11 +31,58 @@ export class PagarmeService implements GatewayPagamentoService {
     }
   }
 
-  realizarEstornoTotal(diaria: Diaria): Promise<Pagamento> {
-    throw new Error('Method not implemented.');
+  async realizarEstornoTotal(diaria: Diaria): Promise<Pagamento> {
+    try {
+      return await this.tryRealizarEstornoTotal(diaria);
+    } catch (error) {
+      throw new BadRequestException(error.response.data.errors);
+    }
   }
+
   realizarEstornoParcial(diaria: Diaria): Promise<Pagamento> {
     throw new Error('Method not implemented.');
+  }
+
+  private tryRealizarEstornoTotal(diaria: Diaria): Promise<Pagamento> {
+    const request = new PagarmeReembolsoRequestDto();
+    request.apiKey = this.API_KEY;
+    return this.realizarEstorno(diaria, request);
+  }
+
+  private async realizarEstorno(
+    diaria: Diaria,
+    request: PagarmeReembolsoRequestDto,
+  ): Promise<Pagamento> {
+    const pagamento = await this.getPagamentoDaDiaria(diaria);
+    const url = `${this.BASE_URL}/transactions/${pagamento.transacaoId}/refund`;
+    const response = await axios.post(url, instanceToPlain(request));
+    return this.criarPagamentoReembolso(diaria, response.data);
+  }
+
+  private async criarPagamentoReembolso(
+    diaria: Diaria,
+    body: PagarmeReembolsoResponseDto,
+  ): Promise<Pagamento> {
+    const response = plainToInstance(PagarmeReembolsoResponseDto, body);
+    const pagamento = new Pagamento();
+    pagamento.valor = response.refundedAmout / 100;
+    pagamento.transacaoId = response.id;
+    pagamento.status = PagamentoStatus.REEMBOLSADO;
+    pagamento.diaria = diaria;
+    return await this.pagamentoRepository.repository.save(pagamento);
+  }
+
+  private async getPagamentoDaDiaria(diaria: Diaria) {
+    const pagamento =
+      await this.pagamentoRepository.repository.findPagamentoParaReembolso(
+        diaria,
+      );
+
+    if (!pagamento) {
+      throw new NotFoundException('Pagamento Não Encontrado');
+    }
+
+    return pagamento;
   }
 
   private async tryPagar(diaria: Diaria, cardHash: string) {

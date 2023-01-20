@@ -3,6 +3,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DiariaRepository } from 'src/api/diarias/diarias.repository';
 import { Diaria } from 'src/api/diarias/entities/diaria.entity';
+import { Pagamento } from 'src/api/pagamentos/entities/pagamento.entity';
+import { PagamentoRepository } from 'src/api/pagamentos/pagamentos.repository';
 import { ConsultaCidade } from './services/consulta-cidade/consulta-cidade';
 import { IbgeService } from './services/consulta-cidade/conulta-cidade.service';
 import { ConsultaDistanciaCep } from './services/consulta-distancia/consulta-distancia';
@@ -14,13 +16,17 @@ import { PagarmeService } from './services/gataway-pagamento/providers/pagarme.s
 import { ScheduleTask } from './tasks/schedule-task';
 
 @Module({
-  imports: [ScheduleModule.forRoot(), TypeOrmModule.forFeature([Diaria])],
+  imports: [
+    ScheduleModule.forRoot(),
+    TypeOrmModule.forFeature([Diaria, Pagamento]),
+  ],
   controllers: [],
   providers: [
     DiariaRepository,
     ScheduleTask,
     DiaristaIndiceService,
     GoogleMatrixService,
+    PagamentoRepository,
     {
       provide: ConsultaCidade,
       useClass: IbgeService,
@@ -32,6 +38,10 @@ import { ScheduleTask } from './tasks/schedule-task';
     {
       provide: DiaristaServiceSelecao,
       useClass: DiaristaIndiceService,
+    },
+    {
+      provide: GatewayPagamentoService,
+      useClass: PagarmeService,
     },
   ],
 })

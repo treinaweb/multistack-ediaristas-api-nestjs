@@ -64,6 +64,16 @@ export class HateoasDiaria extends HateoasBase {
       );
     }
 
+    if (this.isAptaParaCancelamento(diaria)) {
+      this.adicionarLinks(
+        'PATCH',
+        'cancelar_diaria',
+        DiariasController,
+        DiariasController.prototype.cancelar,
+        params,
+      );
+    }
+
     return this.LINKS;
   }
   private isAptaParaAvaliacao(diaria: Diaria, avaliacaoApta: boolean): boolean {
@@ -76,6 +86,18 @@ export class HateoasDiaria extends HateoasBase {
       tipoUsuario === TipoUsuario.CLIENTE &&
       diaria.status === DiariaStatus.CONFIRMADO &&
       diaria.dataAtendimento < hoje
+    ) {
+      return true;
+    }
+    return false;
+  }
+
+  private isAptaParaCancelamento(diaria: Diaria) {
+    const dataHoje = new Date(Date.now());
+    if (
+      (diaria.status === DiariaStatus.PAGO ||
+        diaria.status === DiariaStatus.CONFIRMADO) &&
+      diaria.dataAtendimento > dataHoje
     ) {
       return true;
     }

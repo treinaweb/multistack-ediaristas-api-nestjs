@@ -1,4 +1,12 @@
-import { Controller, Post, Body, UseGuards, Get, Param } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Get,
+  Param,
+  Patch,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { Roles } from 'src/auth/decorators/roles.decorator';
@@ -7,6 +15,7 @@ import { HateoasDiaria } from 'src/core/hateoas/hateoas-diaria';
 import { UsuarioApi } from '../usuarios/entities/usuario.entity';
 import TipoUsuario from '../usuarios/enum/tipo-usuario.enum';
 import { DiariasService } from './diarias.service';
+import { DiariaCancelamentoRequestDto } from './dto/diaria-cancelamento-request.dto';
 import { DiariaRequestDto } from './dto/diaria-request.dto';
 
 @Controller('api/diarias')
@@ -59,5 +68,19 @@ export class DiariasController {
     );
 
     return diariaDto;
+  }
+
+  @Patch(':id/cancelar')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  cancelar(
+    @Body() diariaCancelamentoRequestDto: DiariaCancelamentoRequestDto,
+    @GetUser() usuarioLogado: UsuarioApi,
+    @Param('id') id: number,
+  ) {
+    return this.diariasService.cancelar(
+      id,
+      diariaCancelamentoRequestDto,
+      usuarioLogado,
+    );
   }
 }

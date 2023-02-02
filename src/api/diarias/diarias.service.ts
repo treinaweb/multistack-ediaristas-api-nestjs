@@ -1,15 +1,18 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HateoasDiaria } from 'src/core/hateoas/hateoas-diaria';
+import { GatewayPagamentoService } from 'src/core/services/gataway-pagamento/gataway-pagamento.service';
 import { ValidatorDiaria } from 'src/core/validators/diaria/validator-diaria';
 import { ValidatorDiariaUsuario } from 'src/core/validators/diaria/validator-diaria-usuario';
 import { Repository } from 'typeorm';
 import { AvaliacaoRepository } from '../avaliacoes/avaliacao.repository';
+import { Avaliacao } from '../avaliacoes/entities/avaliacao.entity';
 import { Servico } from '../servicos/entities/servico.entity';
 import { UsuarioApi } from '../usuarios/entities/usuario.entity';
 import TipoUsuario from '../usuarios/enum/tipo-usuario.enum';
 import { DiariaMapper } from './diarias.mapper';
 import { DiariaRepository } from './diarias.repository';
+import { DiariaCancelamentoRequestDto } from './dto/diaria-cancelamento-request.dto';
 import { DiariaRequestDto } from './dto/diaria-request.dto';
 import { DiariaResponseDto } from './dto/diaria-response.dto';
 import { Diaria } from './entities/diaria.entity';
@@ -26,6 +29,7 @@ export class DiariasService {
     private hateOas: HateoasDiaria,
     private validatorUsuario: ValidatorDiariaUsuario,
     private avaliacaoRepository: AvaliacaoRepository,
+    private getawayPagamento: GatewayPagamentoService,
   ) {}
   async cadastrar(
     diariaRequestDto: DiariaRequestDto,
@@ -104,6 +108,59 @@ export class DiariasService {
         }),
       );
     }
+  }
+
+  async cancelar(
+    diariaId: number,
+    diariaCancelamentoRequestDto: DiariaCancelamentoRequestDto,
+    usuarioLogado: UsuarioApi,
+  ) {
+    const { diaria } = await this.buscarPorId(diariaId, usuarioLogado);
+    this.validatorDiaria.validarDiariaCancelamento(diaria);
+
+    if (this.hasPenalizacao(diaria)) {
+      this.aplicarPenalizacao(diaria, usuarioLogado);
+    } else {
+      this.getawayPagamento.realizarEstornoTotal(diaria);
+    }
+
+    diaria.status = DiariaStatus.CANCELADO;
+    diaria.motivoCancelamento = diariaCancelamentoRequestDto.motivoCancelamento;
+    this.diariaRepository.repository.save(diaria);
+
+    return { mensagem: 'Diária cancelada com sucesso' };
+  }
+
+  private aplicarPenalizacao(diaria: Diaria, usuarioLogado: UsuarioApi) {
+    if (usuarioLogado.tipoUsuario === TipoUsuario.DIARISTA) {
+      this.penalizarDiarista(diaria);
+      this.getawayPagamento.realizarEstornoTotal(diaria);
+    } else {
+      this.getawayPagamento.realizarEstornoParcial(diaria);
+    }
+  }
+
+  private async penalizarDiarista(diaria: Diaria) {
+    const avaliacao = new Avaliacao();
+    avaliacao.nota = 1;
+    avaliacao.descricao = 'Penalização por diária cancelada';
+    avaliacao.avaliado = diaria.diarista;
+    avaliacao.visibilidade = false;
+    avaliacao.diaria = diaria;
+
+    await this.avaliacaoRepository.repository.save(avaliacao);
+  }
+
+  private hasPenalizacao(diaria: Diaria): boolean {
+    const hoje = new Date(Date.now());
+    const diferencaDatas = new Date(
+      diaria.dataAtendimento.getTime() - hoje.getTime(),
+    );
+
+    const converterParaHoras = 3600000;
+    const diferencaHoras = diferencaDatas.getTime() / converterParaHoras;
+
+    return diferencaHoras < 24 ? true : false;
   }
 
   async buscarPorId(

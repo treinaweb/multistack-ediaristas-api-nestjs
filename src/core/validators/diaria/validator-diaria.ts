@@ -1,5 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { DiariaRequestDto } from 'src/api/diarias/dto/diaria-request.dto';
+import { Diaria } from 'src/api/diarias/entities/diaria.entity';
+import DiariaStatus from 'src/api/diarias/enum/diaria-status.enum';
 import { DiaristaRepository } from 'src/api/diaristas/diaristas.repository';
 import { Servico } from 'src/api/servicos/entities/servico.entity';
 import { ViaCepService } from 'src/core/via-cep.service';
@@ -36,6 +38,37 @@ export class ValidatorDiaria {
       throw new BadRequestException(
         'Data de atendimento deve ter pelo menos 48h a partir da data atual',
       );
+    }
+  }
+
+  validarDiariaCancelamento(diaria: Diaria) {
+    this.validarStatus(diaria);
+    this.validarDataAtendimento(diaria);
+  }
+
+  private validarDataAtendimento(diaria: Diaria) {
+    const hoje = new Date(Date.now());
+    const dataAtendimento = diaria.dataAtendimento;
+
+    if (hoje > dataAtendimento) {
+      throw new BadRequestException({
+        diaria:
+          'Não é mais possível cancelar a diária, diária ultrapassou a data de atendimento',
+      });
+    }
+  }
+
+  private validarStatus(diaria: Diaria) {
+    const status = !(
+      diaria.status === DiariaStatus.PAGO ||
+      diaria.status === DiariaStatus.CONFIRMADO
+    );
+
+    if (status) {
+      throw new BadRequestException({
+        diaria:
+          'Diária a ser cancelada deve estar com o status pago ou confirmado',
+      });
     }
   }
 

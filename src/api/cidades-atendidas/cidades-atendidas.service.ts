@@ -49,6 +49,7 @@ export class CidadesAtendidasService {
 
         try {
           cidadeAtendida = await this.findByCodigoIbge(codigoIbge);
+          console.log(codigoIbge);
         } catch (error) {
           if (error.status === 404) {
             cidadeAtendida = await this.cadastrarCidadeAtendida(codigoIbge);

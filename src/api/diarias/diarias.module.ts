@@ -19,9 +19,21 @@ import { ValidatorDiariaUsuario } from 'src/core/validators/diaria/validator-dia
 import { AvaliacaoRepository } from '../avaliacoes/avaliacao.repository';
 import { AvaliacaoMapper } from '../avaliacoes/avaliacao.mapper';
 import { Avaliacao } from '../avaliacoes/entities/avaliacao.entity';
+import { GatewayPagamentoService } from 'src/core/services/gataway-pagamento/gataway-pagamento.service';
+import { PagarmeService } from 'src/core/services/gataway-pagamento/providers/pagarme.service';
+import { Pagamento } from '../pagamentos/entities/pagamento.entity';
+import { PagamentoRepository } from '../pagamentos/pagamentos.repository';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Diaria, UsuarioApi, Servico, Avaliacao])],
+  imports: [
+    TypeOrmModule.forFeature([
+      Diaria,
+      UsuarioApi,
+      Servico,
+      Avaliacao,
+      Pagamento,
+    ]),
+  ],
   controllers: [DiariasController],
   providers: [
     DiariasService,
@@ -38,6 +50,11 @@ import { Avaliacao } from '../avaliacoes/entities/avaliacao.entity';
     ViaCepService,
     HateoasDiaria,
     AvaliacaoRepository,
+    PagamentoRepository,
+    {
+      provide: GatewayPagamentoService,
+      useClass: PagarmeService,
+    },
   ],
 })
 export class DiariasModule {}

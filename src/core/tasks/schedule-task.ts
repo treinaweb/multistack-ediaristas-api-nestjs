@@ -31,7 +31,7 @@ export class ScheduleTask {
     this.logger.debug('Task de seleção de diarias finalizada');
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_10_HOURS)
   async cancelarDariaSemCandidato(): Promise<void> {
     this.logger.debug(
       'Iniciando task de cancelamento de diárias sem candidatos',

@@ -43,7 +43,7 @@ export class DiariaRepository {
       const diaria = this.create({
         dataAtendimento,
         tempoAtendimento,
-        preco,
+        preco: preco * 100,
         logradouro,
         numero,
         bairro,
@@ -57,7 +57,7 @@ export class DiariaRepository {
         quantidadeQuintais,
         quantidadeSalas,
         observacoes,
-        valorComissao,
+        valorComissao: valorComissao * 100,
         motivoCancelamento,
         cliente,
         codigoIbge,

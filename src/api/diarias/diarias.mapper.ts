@@ -21,13 +21,13 @@ export class DiariaMapper {
 
     diariaResponseDto.id = diaria.id;
     diariaResponseDto.status = diaria.status;
-    diariaResponseDto.valorComissao = diaria.valorComissao;
+    diariaResponseDto.valorComissao = diaria.valorComissao / 100;
     diariaResponseDto.motivoCancelamento = diaria.motivoCancelamento;
     diariaResponseDto.nomeServico = diaria.servico.nome;
     diariaResponseDto.complemento = diaria.complemento;
     diariaResponseDto.dataAtendimento = diaria.dataAtendimento;
     diariaResponseDto.tempoAtendimento = diaria.tempoAtendimento;
-    diariaResponseDto.preco = diaria.preco;
+    diariaResponseDto.preco = diaria.preco / 100;
     diariaResponseDto.logradouro = diaria.logradouro;
     diariaResponseDto.numero = diaria.numero;
     diariaResponseDto.bairro = diaria.bairro;

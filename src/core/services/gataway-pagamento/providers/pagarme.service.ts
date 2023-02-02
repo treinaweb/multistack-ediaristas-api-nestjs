@@ -35,12 +35,16 @@ export class PagarmeService implements GatewayPagamentoService {
     try {
       return await this.tryRealizarEstornoTotal(diaria);
     } catch (error) {
+      console.log(error);
       throw new BadRequestException(error.response.data.errors);
     }
   }
 
   realizarEstornoParcial(diaria: Diaria): Promise<Pagamento> {
-    throw new Error('Method not implemented.');
+    const request = new PagarmeReembolsoRequestDto();
+    request.apiKey = this.API_KEY;
+    request.amount = diaria.preco / 2;
+    return this.realizarEstorno(diaria, request);
   }
 
   private tryRealizarEstornoTotal(diaria: Diaria): Promise<Pagamento> {
@@ -111,7 +115,7 @@ export class PagarmeService implements GatewayPagamentoService {
 
   private criarTransacaoRequest(diaria: Diaria, cardHash: string) {
     const transacaoRequest = new PagarmeTransacaoRequestDto();
-    transacaoRequest.amount = diaria.preco * 100;
+    transacaoRequest.amount = diaria.preco;
     transacaoRequest.cardHash = cardHash;
     transacaoRequest.async = false;
     transacaoRequest.apiKey = this.API_KEY;

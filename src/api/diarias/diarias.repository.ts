@@ -102,6 +102,8 @@ export class DiariaRepository {
         and usuario_api_id = ${usuarioLogado.id})`,
       );
 
+      console.log(cidades);
+
       const ids = diariasSql.map((diaria) => diaria.id);
 
       if (ids.length === 0) {

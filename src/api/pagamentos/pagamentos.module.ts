@@ -9,11 +9,13 @@ import { Pagamento } from './entities/pagamento.entity';
 import { PagamentoRepository } from './pagamentos.repository';
 import { GatewayPagamentoService } from 'src/core/services/gataway-pagamento/gataway-pagamento.service';
 import { PagarmeService } from 'src/core/services/gataway-pagamento/providers/pagarme.service';
+import { PagamentoMapper } from './pagamento.mapper';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Diaria, Pagamento])],
   controllers: [PagamentosController],
   providers: [
+    PagamentoMapper,
     PagamentosService,
     DiariaRepository,
     ValidatorPagamento,

@@ -12,3 +12,4 @@ Semana | Link | Commit
 21  | [Visualizar](https://github.com/treinaweb/multistack-ediaristas-api-nestjs/tree/semana21)  | [Download](https://github.com/treinaweb/multistack-ediaristas-api-nestjs/archive/refs/heads/semana21.zip) 
 22  | [Visualizar](https://github.com/treinaweb/multistack-ediaristas-api-nestjs/tree/semana22)  | [Download](https://github.com/treinaweb/multistack-ediaristas-api-nestjs/archive/refs/heads/semana22.zip) 
 23  | [Visualizar](https://github.com/treinaweb/multistack-ediaristas-api-nestjs/tree/semana23)  | [Download](https://github.com/treinaweb/multistack-ediaristas-api-nestjs/archive/refs/heads/semana23.zip) 
+25  | [Visualizar](https://github.com/treinaweb/multistack-ediaristas-api-nestjs/tree/semana23)  | [Download](https://github.com/treinaweb/multistack-ediaristas-api-nestjs/archive/refs/heads/semana25.zip) 

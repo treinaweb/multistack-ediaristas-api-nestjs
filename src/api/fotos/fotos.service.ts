@@ -20,4 +20,8 @@ export class FotosService {
 
     return await this.fotoRepository.save(foto);
   }
+
+  async deletar(id: number) {
+    return await this.fotoRepository.delete({ id: id });
+  }
 }

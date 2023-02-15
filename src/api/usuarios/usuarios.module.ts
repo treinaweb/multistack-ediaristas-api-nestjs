@@ -19,6 +19,7 @@ import { TokensService } from 'src/auth/tokens/tokens.service';
 import { AuthService } from 'src/auth/auth.service';
 import { Token } from 'src/auth/tokens/entities/token.entity';
 import { HateoasUsuario } from 'src/core/hateoas/hateoas-usuario';
+import { HateosIndex } from 'src/core/hateoas/hateoas-index';
 
 @Module({
   imports: [

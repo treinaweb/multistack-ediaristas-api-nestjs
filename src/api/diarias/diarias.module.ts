@@ -23,6 +23,7 @@ import { GatewayPagamentoService } from 'src/core/services/gataway-pagamento/gat
 import { PagarmeService } from 'src/core/services/gataway-pagamento/providers/pagarme.service';
 import { Pagamento } from '../pagamentos/entities/pagamento.entity';
 import { PagamentoRepository } from '../pagamentos/pagamentos.repository';
+import { HateoasUsuario } from 'src/core/hateoas/hateoas-usuario';
 
 @Module({
   imports: [

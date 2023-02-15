@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { UsuarioRequestDto } from './dto/usuario-request.dto';
 import { UsuarioRepository } from './usuarios.repository';
@@ -10,6 +10,10 @@ import { FotosService } from '../fotos/fotos.service';
 import { MailService } from 'src/core/services/mail/mail.service';
 import { JwtTokens } from 'src/auth/strategies/jwt-tokens';
 import { JwtPayload } from 'src/auth/strategies/jwt-payload.interface';
+import { UsuarioApi } from './entities/usuario.entity';
+import * as fs from 'fs/promises';
+import { join } from 'path';
+import { UsuarioAtualizarRequestDto } from './dto/usuario-atualizar-request.dto';
 
 @Injectable()
 export class UsuariosService {
@@ -58,6 +62,101 @@ export class UsuariosService {
     return usuarioCadastroDto;
   }
 
+  async ataulizarFotoUsuario(
+    file: Express.Multer.File,
+    usuarioLogado: UsuarioApi,
+    req: Request,
+  ): Promise<{ mensagem: string }> {
+    if (!usuarioLogado.fotoUsuario) {
+      const foto = await this.foto.salvar(file, req);
+      usuarioLogado.fotoUsuario = foto;
+      await this.usuarioRepository.repository.save(usuarioLogado);
+      return { mensagem: 'Foto salva com sucesso' };
+    } else {
+      const id = usuarioLogado.fotoUsuario.id;
+      const nome = usuarioLogado.fotoUsuario.fileName;
+      const foto = await this.foto.salvar(file, req);
+      usuarioLogado.fotoUsuario = foto;
+      await this.usuarioRepository.repository.save(usuarioLogado);
+      await this.apagarFotoDesatualizada(nome, id);
+      return { mensagem: 'Foto atualizada com sucesso' };
+    }
+  }
+
+  async atualizar(
+    atualizarUsuarioRequestDto: UsuarioAtualizarRequestDto,
+    usuarioLogado: UsuarioApi,
+  ): Promise<{ mensagem: string }> {
+    this.atualizarInformacoesUsuarioLogado(
+      atualizarUsuarioRequestDto,
+      usuarioLogado,
+    );
+
+    await this.atualizarSenha(atualizarUsuarioRequestDto, usuarioLogado);
+
+    await this.usuarioRepository.repository.save(usuarioLogado);
+    return { mensagem: 'Usuário atualizado com sucesso' };
+  }
+  private async atualizarSenha(
+    atualizarUsuarioRequestDto: UsuarioAtualizarRequestDto,
+    usuarioLogado: UsuarioApi,
+  ) {
+    const hasSenha =
+      atualizarUsuarioRequestDto.password &&
+      atualizarUsuarioRequestDto.newPassword &&
+      atualizarUsuarioRequestDto.passwordConfirmation;
+
+    if (hasSenha) {
+      await this.verificarSenha(atualizarUsuarioRequestDto, usuarioLogado);
+      this.validator.validarConfirmacaoDeSenha(
+        atualizarUsuarioRequestDto.newPassword,
+        atualizarUsuarioRequestDto.passwordConfirmation,
+      );
+      const novaSenha = atualizarUsuarioRequestDto.newPassword;
+      await usuarioLogado.setPassword(novaSenha);
+    }
+  }
+  private async verificarSenha(
+    atualizarUsuarioRequestDto: UsuarioAtualizarRequestDto,
+    usuarioLogado: UsuarioApi,
+  ) {
+    const senhaRequest = atualizarUsuarioRequestDto.password;
+    const senhaDB = usuarioLogado.senha;
+
+    if (!(await bcrypt.compare(senhaRequest, senhaDB))) {
+      throw new BadRequestException('A senha informada está incorreta');
+    }
+  }
+
+  private atualizarInformacoesUsuarioLogado(
+    atualizarUsuarioRequestDto: UsuarioAtualizarRequestDto,
+    usuarioLogado: UsuarioApi,
+  ) {
+    usuarioLogado.nomeCompleto = !atualizarUsuarioRequestDto.nomeCompleto
+      ? usuarioLogado.nomeCompleto
+      : atualizarUsuarioRequestDto.nomeCompleto;
+
+    usuarioLogado.chavePix = !atualizarUsuarioRequestDto.chavePix
+      ? usuarioLogado.chavePix
+      : atualizarUsuarioRequestDto.chavePix;
+
+    usuarioLogado.cpf = !atualizarUsuarioRequestDto.cpf
+      ? usuarioLogado.cpf
+      : atualizarUsuarioRequestDto.cpf;
+
+    usuarioLogado.email = !atualizarUsuarioRequestDto.email
+      ? usuarioLogado.email
+      : atualizarUsuarioRequestDto.email;
+
+    usuarioLogado.nascimento = !atualizarUsuarioRequestDto.nascimento
+      ? usuarioLogado.nascimento
+      : atualizarUsuarioRequestDto.nascimento;
+
+    usuarioLogado.telefone = !atualizarUsuarioRequestDto.telefone
+      ? usuarioLogado.telefone
+      : atualizarUsuarioRequestDto.telefone;
+  }
+
   private async calcularReputacaoMedia(tipoUsuario: number): Promise<number> {
     let reputacaoMedia =
       await this.usuarioRepository.repository.getMediaReputacao(tipoUsuario);
@@ -67,5 +166,18 @@ export class UsuariosService {
     }
 
     return reputacaoMedia;
+  }
+
+  private async apagarFotoDesatualizada(nome: string, id: number) {
+    try {
+      const path = join(__dirname, '..', '..', '..', '/public/images', nome);
+      if (!id) return null;
+      await fs.unlink(path);
+      await this.foto.deletar(id);
+    } catch (error) {
+      console.log('Current directory:', __dirname);
+      console.log(error);
+      throw new BadRequestException('Problema ao excluir foto desatualizada');
+    }
   }
 }

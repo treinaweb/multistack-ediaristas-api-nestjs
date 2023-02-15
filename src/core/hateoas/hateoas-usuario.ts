@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { CidadesAtendidasController } from 'src/api/cidades-atendidas/cidades-atendidas.controller';
-import { DiariasController } from 'src/api/diarias/diarias.controller';
-import { EnderecoDiaristaController } from 'src/api/endereco-diarista/endereco-diarista.controller';
-import { OportunidadesController } from 'src/api/oportunidades/oportunidades.controller';
-import { PagamentosController } from 'src/api/pagamentos/pagamentos.controller';
-import TipoUsuario from 'src/api/usuarios/enum/tipo-usuario.enum';
 import { HateoasLinks } from './hateoas.interface';
 import { HateoasBase } from './hatoas-base';
+import { DiariasController } from 'src/api/diarias/diarias.controller';
+import TipoUsuario from 'src/api/usuarios/enum/tipo-usuario.enum';
+import { EnderecoDiaristaController } from 'src/api/endereco-diarista/endereco-diarista.controller';
+import { CidadesAtendidasController } from 'src/api/cidades-atendidas/cidades-atendidas.controller';
+import { OportunidadesController } from 'src/api/oportunidades/oportunidades.controller';
+import { PagamentosController } from 'src/api/pagamentos/pagamentos.controller';
+import { UsuariosController } from 'src/api/usuarios/usuarios.controller';
 
 @Injectable()
 export class HateoasUsuario extends HateoasBase {
@@ -65,6 +66,20 @@ export class HateoasUsuario extends HateoasBase {
         PagamentosController.prototype.listarPagamentos,
       );
     }
+
+    this.adicionarLinks(
+      'POST',
+      'alterar_foto_usuario',
+      UsuariosController,
+      UsuariosController.prototype.atualizarFotoUsuario,
+    );
+
+    this.adicionarLinks(
+      'PUT',
+      'editar_usuario',
+      UsuariosController,
+      UsuariosController.prototype.atualizar,
+    );
 
     this.adicionarLinks(
       'GET',

@@ -34,6 +34,7 @@ export class UsuarioMapper {
     usuarioDTO.nascimento = usuario.nascimento;
     usuarioDTO.telefone = usuario.telefone;
     usuarioDTO.chavePix = usuario.chavePix;
+    usuarioDTO.fotoUsuario = usuario.fotoUsuario.url;
     return usuarioDTO;
   }
 

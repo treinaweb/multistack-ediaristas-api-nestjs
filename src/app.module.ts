@@ -25,9 +25,11 @@ import { AvaliacaoModule } from './api/avaliacoes/avaliacao.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { HateoasDiaria } from './core/hateoas/hateoas-diaria';
 import { HateoasUsuario } from './core/hateoas/hateoas-usuario';
+import { PasswordResetModule } from './api/password-reset/password-reset.module';
 
 @Module({
   imports: [
+    PasswordResetModule,
     AuthModule,
     TypeOrmModule.forRootAsync({ useClass: TypeOrmConfigService }),
     UsuariosModule,

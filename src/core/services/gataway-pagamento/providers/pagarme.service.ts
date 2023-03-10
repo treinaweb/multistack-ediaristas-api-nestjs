@@ -21,7 +21,7 @@ export class PagarmeService implements GatewayPagamentoService {
   constructor(private pagamentoRepository: PagamentoRepository) {}
 
   BASE_URL = 'https://api.pagar.me/1';
-  API_KEY = 'ak_test_nE14ZiG433nQG0D3aR0XhpzCj4iPkR';
+  API_KEY = process.env.API_KEY_PAGARME;
 
   async pagar(diaria: Diaria, cardHash: string): Promise<Pagamento> {
     try {

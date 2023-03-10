@@ -20,8 +20,8 @@ import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { UsuarioApi } from './entities/usuario.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import multerConfigProfile from './multer-config-profile';
 import { UsuarioAtualizarRequestDto } from './dto/usuario-atualizar-request.dto';
+import multerConfigProfile from './multer-config-profile';
 
 @Controller('api/usuarios')
 export class UsuariosController {
@@ -35,7 +35,7 @@ export class UsuariosController {
   @UseInterceptors(FileInterceptor('foto_documento', multerConfig))
   async cadastrar(
     @Body() usuarioRequestDto: UsuarioRequestDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: Express.MulterS3.File,
     @Req() req: Request,
   ) {
     const usuarioCadastrado = await this.usuariosService.cadastrar(
@@ -56,7 +56,7 @@ export class UsuariosController {
   @UseInterceptors(FileInterceptor('foto_usuario', multerConfigProfile))
   async atualizarFotoUsuario(
     @GetUser() usuarioLogado: UsuarioApi,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: Express.MulterS3.File,
     @Req() req: Request,
   ) {
     return await this.usuariosService.ataulizarFotoUsuario(

@@ -3,18 +3,19 @@ import { Module } from '@nestjs/common';
 import { join } from 'path';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { MailService } from './mail.service';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
     MailerModule.forRootAsync({
-      useFactory: async () => ({
+      useFactory: async (config: ConfigService) => ({
         transport: {
           host: 'smtp.mailgun.org',
           secure: false,
           port: 587,
           auth: {
-            user: 'postmaster@sandbox0e28a0cb8d6e41ada1b1b839eb54ae64.mailgun.org',
-            pass: '3abdf660f2ba2ce890399b147e0f80d0-52d193a0-29ddd387',
+            user: config.get<string>('MAILGUN_USERNAME'),
+            pass: config.get<string>('MAILGUN_PASSWORD'),
           },
           ignoreTLS: true,
         },
@@ -29,6 +30,7 @@ import { MailService } from './mail.service';
           },
         },
       }),
+      inject: [ConfigService],
     }),
   ],
   providers: [MailService],
